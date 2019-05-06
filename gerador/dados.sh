@@ -1,34 +1,38 @@
 #!/bin/bash
 declare -A cor=( [0]="\033[1;37m" [1]="\033[1;34m" [2]="\033[1;31m" [3]="\033[1;33m" [4]="\033[1;32m" )
 barra="\033[0m\e[34m======================================================\033[1;37m"
-[[ -z $1 ]] && exit || id=$1
+SCPdir="/etc/newadm" && [[ ! -d ${SCPdir} ]] && exit
 SCPfrm="/etc/ger-frm" && [[ ! -d ${SCPfrm} ]] && exit
 SCPinst="/etc/ger-inst" && [[ ! -d ${SCPinst} ]] && exit
-[[ $(dpkg --get-selections|grep -w "gawk"|head -1) ]] || apt-get install gawk -y &>/dev/null
-[[ ! -e /usr/bin/trans ]] && wget -O /usr/bin/trans http://git.io/trans &> /dev/null
-fun_trans () {
+fun_trans () { 
+local texto
+local retorno
 declare -A texto
-[[ ! -e /etc/texto-dados ]] && touch /etc/texto-dados
-source /etc/texto-dados
-if [[ -z $(echo ${texto[$2]}) ]]; then
- retorno="$(source trans -b pt:$1 "$2"|sed -e 's/[^a-z0-9 -]//ig')"
+SCPidioma="${SCPdir}/idioma"
+[[ ! -e ${SCPidioma} ]] && touch ${SCPidioma}
+local LINGUAGE=$(cat ${SCPidioma})
+[[ -z $LINGUAGE ]] && LINGUAGE=pt
+[[ ! -e /etc/texto-adm ]] && touch /etc/texto-adm
+source /etc/texto-adm
+if [[ -z "$(echo ${texto[$@]})" ]]; then
+ retorno="$(source trans -e google -b pt:${LINGUAGE} "$@"|sed -e 's/[^a-z0-9 -]//ig' 2>/dev/null)"
  if [[ $retorno = "" ]];then
- retorno="$(source trans -e bing -b pt:$1 "$2"|sed -e 's/[^a-z0-9 -]//ig')"
+ retorno="$(source trans -e bing -b pt:${LINGUAGE} "$@"|sed -e 's/[^a-z0-9 -]//ig' 2>/dev/null)"
  fi
  if [[ $retorno = "" ]];then 
- retorno="$(source trans -e yandex -b pt:$1 "$2"|sed -e 's/[^a-z0-9 -]//ig')"
+ retorno="$(source trans -e yandex -b pt:${LINGUAGE} "$@"|sed -e 's/[^a-z0-9 -]//ig' 2>/dev/null)"
  fi
- echo "texto[$2]='$retorno'"  >> /etc/texto-dados
- echo "$retorno"
+echo "texto[$@]='$retorno'"  >> /etc/texto-adm
+echo "$retorno"
 else
- echo "${texto[$2]}"
+echo "${texto[$@]}"
 fi
 }
 net_meter () {
 net_dir="/etc/usr_cnx"
-usr_text="$(fun_trans ${id} "USUÁRIOS")"
-datos_text="$(fun_trans ${id} "USO APROXIMADO")"
-porcen_text="$(fun_trans ${id} "CONSUMO TOTAL")"
+usr_text="$(fun_trans "USUÁRIOS")"
+datos_text="$(fun_trans "USO APROXIMADO")"
+porcen_text="$(fun_trans "CONSUMO TOTAL")"
 net_cent="/tmp/porcentagem"
 sed -i '/^$/d' $net_dir
  [[ ! -e "$net_cent" ]] && touch $net_cent
@@ -40,7 +44,7 @@ sed -i '/^$/d' $net_dir
 bb=$(printf '%-18s' "$datos_text")
 aa=$(printf '%-19s' "$usr_text")
 cc=$(printf '%-18s' "$porcen_text")
-echo -e "\033[1;32m $(fun_trans ${id} "MONITOR DE CONSUMO") [NEW-ADM]"
+echo -e "\033[1;32m $(fun_trans "MONITOR DE CONSUMO") [NEW-ADM]"
 echo -e "$barra"
 echo -e "\033[1;33m $aa $bb $cc "
 echo -e "$barra"
@@ -57,7 +61,7 @@ if [ "$(($(echo $u | awk '{print $2}')/970))" -gt "1" ]; then
 echo -e "\033[1;32m $a \033[1;31m$b \033[1;32m$c"
 fi
 done < $net_dir
-[[ "$(cat $net_dir)" = "" ]] && echo -e "\033[1;31m $(fun_trans ${id} "Não há informação de consumo")!"
+[[ "$(cat $net_dir)" = "" ]] && echo -e "\033[1;31m $(fun_trans "Não há informação de consumo")!"
 echo -e "$barra"
 unset net_dir
 }

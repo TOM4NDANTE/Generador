@@ -42,3 +42,4 @@ utils.sh
 vnc
 message.txt
 http-server.py
+panelweb.sh

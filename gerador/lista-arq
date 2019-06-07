@@ -42,6 +42,3 @@ utils.sh
 vnc
 message.txt
 http-server.py
-panelweb.sh
-anti-ddos.sh
-un-ddos.sh

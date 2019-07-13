@@ -35,6 +35,7 @@ squid.sh
 ssl.sh
 ssld.sh
 ssrrmu.sh
+shadown.sh
 toolmaster.py
 ultrahost
 unddos.py

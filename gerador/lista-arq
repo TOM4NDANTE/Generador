@@ -4,6 +4,7 @@ cambiopass.sh
 Crear-Demo.sh
 dados.py
 dados.sh
+dados.zip
 dropbear.sh
 fai2ban.sh
 GENERADOR_BIN.sh
@@ -14,8 +15,10 @@ htop.sh
 insta_painel
 MasterBin.sh
 menu
+message.txt
 openvpn.sh
-Painel.sh
+painel.zip
+panelweb.sh
 paysnd.sh
 payySND.sh
 PDirect.py
@@ -27,6 +30,7 @@ PPub.py
 Proxy-Privado.sh
 Proxy-Publico.sh
 rootpass.sh
+shadown.sh
 shadowsocks.sh
 sockspy.sh
 speed.sh
@@ -35,14 +39,11 @@ squid.sh
 ssl.sh
 ssld.sh
 ssrrmu.sh
-shadown.sh
 toolmaster.py
 ultrahost
 unddos.py
 usercodes
 utils.sh
 vnc
-message.txt
-http-server.py
-panelweb.sh
+v2ray.sh
 http-server.py

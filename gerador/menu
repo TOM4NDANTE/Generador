@@ -131,7 +131,7 @@ atualiza_fun () {
 cd $HOME
 tput cuu1 && tput dl1
 msg -bar2
-msg -ama "$(fun_trans "ACTUALIZADOR ADM SCRIPTS"): \033[1;32m[ NEW - ULTIMATE - SCRIPT ]  \033[1;33m[\033[1;34m LA CASITA DEL TERROR \033[1;33m] \033[1;31m[\033[1;37mV ♾\033[1;31m]"
+msg -ama "$(fun_trans "ACTUALIZADOR ADM SCRIPTS"): \033[1;32m[ NEW - ULTIMATE - SCRIPT ]  \033[1;33m[\033[1;34m LA CASITA DEL TERROR \033[1;33m] \033[1;31m[\033[1;37mFINAL\033[1;31m]"
 msg -verm "$(fun_trans "Al proseguir los datos como el tiempo de uso seran perdidos"): "
 msg -bar2
 while [[ $Key != @(s|S|y|Y|n|N) ]]; do
@@ -140,8 +140,8 @@ tput cuu1 && tput dl1
 done
 if [[ $Key = @(s|S|y|Y) ]]; then
 msg -verm "$(fun_trans "Perfecto Iniciando Procedimiento"): "
-wget -O $HOME/OnlyCodeMX4.5.sh https://www.dropbox.com/s/pl5g40tjlinxmcg/OnlyCodeMX4.5.sh &> /dev/null
-chmod +x $HOME/OnlyCodeMX4.5.sh*
+wget -O $HOME/instalador.sh https://www.dropbox.com/s/owd2xh7g1qo6xxi/instalador.sh &> /dev/null
+chmod +x $HOME/instalador.sh*
 local LINGUAGE=$(cat ${SCPidioma})
 $HOME/OnlyCodeMX4.5.sh "${LINGUAGE}"
 rm -rf OnlyCodeMX4.5.sh

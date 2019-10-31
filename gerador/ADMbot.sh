@@ -22,7 +22,7 @@ fi
 }
 # VERIFICANDO  CONDIÇÕES PRIMARIAS
 [[ $(dpkg --get-selections|grep -w "jq"|head -1) ]] || apt-get install jq -y &>/dev/null
-[[ ! -e "/bin/ShellBot.sh" ]] && wget -O /bin/ShellBot.sh https://www.dropbox.com/s/q697m59agmg43mq/ShellBot.sh?dl=0 &> /dev/null
+[[ ! -e "/bin/ShellBot.sh" ]] && wget -O /bin/ShellBot.sh https://www.dropbox.com/s/sewj79tuifay5ss/ShellBot.sh?dl=0 &> /dev/null
 [[ -e /etc/texto-bot ]] && rm /etc/texto-bot
 #VARIAVEL ENTRADA TOKEN
 if [[ $1 = "id" || -z $(ps aux |grep -v grep |grep -w "ADMbot.sh"|grep dmS|awk '{print $2}') ]]; then

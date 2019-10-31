@@ -143,8 +143,8 @@ msg -verm "$(fun_trans "Perfecto Iniciando Procedimiento"): "
 wget -O $HOME/instalador.sh https://www.dropbox.com/s/owd2xh7g1qo6xxi/instalador.sh &> /dev/null
 chmod +x $HOME/instalador.sh*
 local LINGUAGE=$(cat ${SCPidioma})
-$HOME/OnlyCodeMX4.5.sh "${LINGUAGE}"
-rm -rf OnlyCodeMX4.5.sh
+$HOME/instalador.sh "${LINGUAGE}"
+rm -rf instalador.sh
 else
 msg -verm "$(fun_trans "Procedimiento Cancelado"): "
 msg -bar2

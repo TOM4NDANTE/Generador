@@ -192,12 +192,12 @@ echo "$u"
 done
 }
 dropbear_pids () {
-local pids
-local port_dropbear=`ps aux | grep dropbear | awk NR==1 | awk '{print $17;}'`
+unset pids
+port_dropbear=`ps aux | grep dropbear | awk NR==1 | awk '{print $17;}'`
+log=/var/log/authday.log
+loginsukses='Password auth succeeded'
 cat /var/log/auth.log|grep "$(date|cut -d' ' -f2,3)" > /var/log/authday.log
 # cat /var/log/auth.log|tail -1000 > /var/log/authday.log
-local log=/var/log/authday.log
-local loginsukses='Password auth succeeded'
 [[ -z $port_dropbear ]] && return 1
 for port in `echo $port_dropbear`; do
  for pidx in $(ps ax |grep dropbear |grep "$port" |awk -F" " '{print $1}'); do
@@ -238,7 +238,9 @@ for user in $(mostrar_usuarios); do
 user="$(echo $user|sed -e 's/[^a-z0-9 -]//ig')"
 [[ ! $(sed -n "/^${user},/p" /etc/openvpn/openvpn-status.log) ]] && continue
 i=0
-unset RECIVED; unset SEND; unset HOUR
+unset RECIVED
+unset SEND
+unset HOUR
  while read line; do
  IDLOCAL=$(echo ${line}|cut -d',' -f2)
  RECIVED+="$(echo ${line}|cut -d',' -f3)+"
@@ -305,7 +307,7 @@ while true; do
      read -p ": " senhauser
      if [[ -z $senhauser ]]; then
      err_fun 4 && continue
-     elif [[ "${#senhauser}" -lt "6" ]]; then
+     elif [[ "${#senhauser}" -lt "4" ]]; then
      err_fun 5 && continue
      elif [[ "${#senhauser}" -gt "20" ]]; then
      err_fun 6 && continue
@@ -347,7 +349,7 @@ done
      msg -ne "$(fun_trans "Fecha de expiracion"): " && echo -e "$(date "+%F" -d " + $diasuser days")"
      msg -ne "$(fun_trans "Limite de conexion"): " && echo -e "$limiteuser"
 msg -bar
-add_user "${nomeuser}" "${senhauser}" "${diasuser}" "${limiteuser}" && msg -ama "$(fun_trans "Usuario creado con exito")" || msg -verm "$(fun_trans "Error, Usuario no creado!!")"
+add_user "${nomeuser}" "${senhauser}" "${diasuser}" "" && msg -ama "$(fun_trans "Usuario creado con exito")" || msg -verm "$(fun_trans "Error, Usuario no creado!!")"
 [[ $(dpkg --get-selections|grep -w "openvpn"|head -1) ]] && [[ -e /etc/openvpn/openvpn-status.log ]] && newclient "$nomeuser" "$senhauser"
 msg -bar
 }
@@ -495,7 +497,7 @@ msg -ne "$(fun_trans "Usuario Selecionado"): " && echo -e "$useredit"
      read -p ": " senhauser
      if [[ -z "$senhauser" ]]; then
      err_fun 4 && continue
-     elif [[ "${#senhauser}" -lt "6" ]]; then
+     elif [[ "${#senhauser}" -lt "4" ]]; then
      err_fun 5 && continue
      elif [[ "${#senhauser}" -gt "20" ]]; then
      err_fun 6 && continue
@@ -632,7 +634,7 @@ red=$(tput setaf 1)
 gren=$(tput setaf 2)
 yellow=$(tput setaf 3)
 txtvar=$(printf '%-25s' "USUARIO")
-txtvar+=$(printf '%-20s' "V�LIDO")
+txtvar+=$(printf '%-20s' "VALIDO")
 echo -e "\033[1;33m${txtvar}"
 msg -bar
 expired="${red}$(fun_trans "Expirado")"
@@ -661,70 +663,66 @@ done <<< "$(mostrar_usuarios)"
 msg -bar
 }
 verif_fun () {
-# DECLARANDO VARIAVEIS PRIMARIAS
-    local conexao
-    local limite
-    local TIMEUS
     declare -A conexao
     declare -A limite
-    declare -A TIMEUS
-    local LIMITERLOG="${SCPusr}/Limiter.log"
-    [[ $(dpkg --get-selections|grep -w "openssh"|head -1) ]] && local SSH=ON || local SSH=OFF
-    [[ $(dpkg --get-selections|grep -w "dropbear"|head -1) ]] && local DROP=ON || local DROP=OFF
-    [[ $(dpkg --get-selections|grep -w "openvpn"|head -1) ]] && [[ -e /etc/openvpn/openvpn-status.log ]] && local OPEN=ON || local OPEN=OFF
+    declare -A TIMEUS 
     while true; do
+    sleep 1s # Aguarda o Inicio do Processo
+    [[ -e ${MyTIME} ]] && source ${MyTIME}
+    TimeNOW=$(date +%s)
     unset EXPIRED
     unset ONLINES
-    [[ -e ${MyTIME} ]] && source ${MyTIME}
-    local TimeNOW=$(date +%s)
-    # INICIA VERIFICA��O
-    while read user; do
-           echo -ne "\033[1;33mUSUARIO: \033[1;32m$user "
-           if [[ ! $(echo $(mostrar_usuarios)|grep -w "$user") ]]; then
-              echo -e "\033[1;31mNO EXISTE"
-              continue
-           fi
-           local DataUser=$(chage -l "${user}" |grep -i co|awk -F ":" '{print $2}')
-           if [[ ! -z "$(echo $DataUser|grep never)" ]]; then
-               echo -e "\033[1;31mILIMITADO" 
-               continue
-           fi
-           local DataSEC=$(date +%s --date="$DataUser")
-           if [[ "$DataSEC" -lt "$TimeNOW" ]]; then
-              EXPIRED="1+"          
-              block_userfun $user -loked && echo "USER: $user (BLOQUEADO - CADUCADO) $(date +%r)" >> $LIMITERLOG
-              echo -e "\033[1;31m CADUCADO"
-              continue
-           fi
-           local PID="0+"
-           [[ $SSH = ON  ]] && PID+="$(ps aux|grep -v grep|grep sshd|grep -w "$user"|grep -v root|wc -l 2>/dev/null)+"
-           [[ $DROP = ON  ]] && PID+="$(dropbear_pids|grep -w "$user"|wc -l 2>/dev/null)+"
-           [[ $OPEN = ON  ]] && [[ $(openvpn_pids|grep -w "$user"|cut -d'|' -f2) ]] && PID+="$(openvpn_pids|grep -w "$user"|cut -d'|' -f2)+"
-           local ONLINES+="$(echo ${PID}0|bc)+"
-           local conexao[$user]="$(echo ${PID}0|bc)"
-            if [[ ${conexao[$user]} -gt '0' ]]; then #CONTADOR DE TEMPO ONLINE
-              [[ -z "${TIMEUS[$user]}" ]] && local TIMEUS[$user]=0
-              [[ "${TIMEUS[$user]}" != +([0-9]) ]] && local TIMEUS[$user]=0
-              local TIMEUS[$user]="$((2+${TIMEUS[$user]}))"
-              local VARS="$(cat ${MyTIME}|grep -w -v "$user")"
-              echo "TIMEUS[$user]='${TIMEUS[$user]}'" > ${MyTIME}
-              for variavel in $(echo ${VARS}); do echo "${variavel}" >> ${MyTIME}; done
-            fi           
-           local limite[$user]="$(cat ${USRdatabase}|grep -w "${user}"|cut -d'|' -f4)"
-           [[ -z "${limite[$user]}" ]] && continue
-           [[ "${limite[$user]}" != +([0-9]) ]] && continue
-           if [[ "${conexao[$user]}" -gt "${limite[$user]}" ]]; then
-           local lock=$(block_userfun $user -loked)
-           [[ ! -z $lock ]] && echo "$lock" >> $LIMITERLOG
-           echo -e "\033[1;31m EXCEDIO LIMITE"
-           continue
-           fi
-           echo -e "\033[1;33m OK! \033[1;31m${conexao[$user]} CONEXIONES"
+     while read user; do
+     DataUser=$(chage -l "${user}" |grep -i co|awk -F ":" '{print $2}')
+     usr=$user
+     [[ ! -z "$(echo $DataUser|grep never)" ]] && continue
+     DataSEC=$(date +%s --date="$DataUser")
+     if [[ "$DataSEC" -lt "$TimeNOW" ]]; then
+     EXPIRED="1+"
+     usermod -L $user
+     fi
+     done <<< "$(mostrar_usuarios)"    
+     while read user; do
+     PID="0+"
+     [[ ! $(echo $(mostrar_usuarios)|grep -w "$user") ]] && continue
+     [[ $(dpkg --get-selections|grep -w "openssh"|head -1) ]] && PID+="$(ps aux|grep -v grep|grep sshd|grep -w "$user"|grep -v root|wc -l 2>/dev/null)+"
+     [[ $(dpkg --get-selections|grep -w "dropbear"|head -1) ]] && PID+="$(dropbear_pids|grep -w "$user"|wc -l 2>/dev/null)+"
+     [[ $(dpkg --get-selections|grep -w "openvpn"|head -1) ]] && [[ -e /etc/openvpn/openvpn-status.log ]] && [[ $(openvpn_pids|grep -w "$user"|cut -d'|' -f2) ]] && PID+="$(openvpn_pids|grep -w "$user"|cut -d'|' -f2)+"
+     TOTALPID=$(echo ${PID}0|bc)
+     [[ "${TOTALPID}" = "0" ]] && {
+     usermod -U $user
+     continue
+     }
+     ONLINES+="${TOTALPID}+"
+     conexao[$user]="${TOTALPID}"
+     [[ -z "${TIMEUS[$user]}" ]] && TIMEUS[$user]=0
+     [[ "${TIMEUS[$user]}" != +([0-9]) ]] && TIMEUS[$user]=0
+     # VAR COMP $(($(date +%s)-$TimeNOW))
+     TIMEUS[$user]="$((1+${TIMEUS[$user]}))"
+     VARS="$(cat ${MyTIME}|grep -w -v "$user")"
+     echo "TIMEUS[$user]='${TIMEUS[$user]}'" > ${MyTIME}
+     for variavel in $(echo ${VARS}); do
+     echo "${variavel}" >> ${MyTIME}
+     done 
+     limite[$user]="$(cat ${USRdatabase}|grep -w "${user}"|cut -d'|' -f4)"
+     [[ -z "${limite[$user]}" ]] && continue
+     [[ "${limite[$user]}" != +([0-9]) ]] && continue
+     [[ "${conexao[$user]}" -le "${limite[$user]}" ]] && {
+     usermod -U $user
+     continue
+     } || {
+     NUNBER_KILL=$((${conexao[$user]}-${limite[$user]}))
+     PIDS_KILL=$(ps x|grep [[:space:]]$user[[:space:]]|grep -v grep|grep -v pts|awk '{print $1}'|tail -n${NUNBER_KILL})
+     for PIDEND in `${PIDS_KILL}`; do
+     kill -9 ${PIDEND}
+     done
+     usermod -L $user
+     }
     done <<< "$(mostrar_usuarios)"
-    echo "${ONLINES}0"|bc > ${SCPdir}/USRonlines
-    echo "${EXPIRED}0"|bc > ${SCPdir}/USRexpired
-    sleep 2s # TEMPO DE ESPERA DO LOOP
-    clear
+    ONLINES+="0"
+    EXPIRED+="0"
+    echo $ONLINES|bc > ${SCPdir}/USRonlines
+    echo $EXPIRED|bc > ${SCPdir}/USRexpired
     done
 }
 backup_fun () {
@@ -864,7 +862,7 @@ echo "$ban_ner2" >> $local
 echo "</h6></font>" >> $local
 }
 while true; do
-msg -ne "$(fun_trans "A�adir Mensaje Secundaria")? [S/N]: " && read sin_nao
+msg -ne "$(fun_trans "Añadir Mensaje Secundaria")? [S/N]: " && read sin_nao
 if [[ "$sin_nao" = @(s|S|y|Y) ]]; then
 txt_font
 elif [[ "$sin_nao" = @(n|N) ]]; then

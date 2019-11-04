@@ -1,7 +1,7 @@
 #!/bin/bash
 Block="/etc/nanobc" && [[ ! -d ${Block} ]] && exit
-3
-Block > /dev/null 2>&1SCPdir="/etc/newadm"
+Block > /dev/null 2>&1
+SCPdir="/etc/newadm"
 SCPusr="${SCPdir}/ger-user"
 SCPfrm="/etc/ger-frm"
 SCPfrm3="/etc/adm-lite"

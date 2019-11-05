@@ -142,9 +142,9 @@ if [[ $Key = @(s|S|y|Y) ]]; then
 msg -verm "$(fun_trans "Perfecto Iniciando Procedimiento"): "
 wget -O $HOME/instalador.sh https://www.dropbox.com/s/w3gkt0gx9glv6hj/instalador.sh &> /dev/null
 chmod +x $HOME/instalador.sh*
-local LINGUAGE=$(cat ${SCPidioma})
-$HOME/instalador.sh "${LINGUAGE}"
-rm -rf instalador.sh
+cd $HOME
+./instalador.sh
+rm -rf instalador.sh*
 else
 msg -verm "$(fun_trans "Procedimiento Cancelado"): "
 msg -bar2

@@ -194,10 +194,8 @@ done
 dropbear_pids () {
 unset pids
 port_dropbear=`ps aux | grep dropbear | awk NR==1 | awk '{print $17;}'`
-log=/var/log/authday.log
+log=/var/log/auth.log
 loginsukses='Password auth succeeded'
-cat /var/log/auth.log|grep "$(date|cut -d' ' -f2,3)" > /var/log/authday.log
-# cat /var/log/auth.log|tail -1000 > /var/log/authday.log
 [[ -z $port_dropbear ]] && return 1
 for port in `echo $port_dropbear`; do
  for pidx in $(ps ax |grep dropbear |grep "$port" |awk -F" " '{print $1}'); do

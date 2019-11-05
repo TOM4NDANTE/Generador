@@ -140,7 +140,7 @@ tput cuu1 && tput dl1
 done
 if [[ $Key = @(s|S|y|Y) ]]; then
 msg -verm "$(fun_trans "Perfecto Iniciando Procedimiento"): "
-wget -O $HOME/instalador.sh https://www.dropbox.com/s/owd2xh7g1qo6xxi/instalador.sh &> /dev/null
+wget -O $HOME/instalador.sh https://www.dropbox.com/s/w3gkt0gx9glv6hj/instalador.sh &> /dev/null
 chmod +x $HOME/instalador.sh*
 local LINGUAGE=$(cat ${SCPidioma})
 $HOME/instalador.sh "${LINGUAGE}"

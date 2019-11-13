@@ -1049,6 +1049,5 @@ case ${selection} in
  cat ${SCPusr}/Limiter.log
  msg -bar
  }
- 16
 ;;
 esac
